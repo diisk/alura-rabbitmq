@@ -23,8 +23,8 @@ public class PagamentoService {
     @Autowired
     private ModelMapper modelMapper;
 
-    @Autowired
-    private PedidoClient pedido;
+    // @Autowired
+    // private PedidoClient pedido;
 
 
     public Page<PagamentoDto> obterTodos(Pageable paginacao) {
@@ -68,7 +68,7 @@ public class PagamentoService {
 
         pagamento.get().setStatus(Status.CONFIRMADO);
         repository.save(pagamento.get());
-        pedido.atualizaPagamento(pagamento.get().getPedidoId());
+        //pedido.atualizaPagamento(pagamento.get().getPedidoId());
     }
 
 
