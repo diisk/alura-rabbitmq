@@ -40,23 +40,26 @@ public class PagamentoController {
         return ResponseEntity.ok(dto);
     }
 
-
     @PostMapping
-    public ResponseEntity<PagamentoDto> cadastrar(@RequestBody @Valid PagamentoDto dto, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<PagamentoDto> cadastrar(@RequestBody @Valid PagamentoDto dto,
+            UriComponentsBuilder uriBuilder) {
         PagamentoDto pagamento = service.criarPagamento(dto);
         URI endereco = uriBuilder.path("/pagamentos/{id}").buildAndExpand(pagamento.getId()).toUri();
 
-        Message message = new Message(("Criei um pagamento com o id "+pagamento.getId()).getBytes());
+        // Message message = new Message(("Criei um pagamento com o id
+        // "+pagamento.getId()).getBytes());
 
-        //rabbitTemplate.send("pagamento.concluido", message);
+        // rabbitTemplate.send("pagamento.concluido", message);
 
-        rabbitTemplate.convertAndSend("pagamento.concluido",pagamento);
+        // rabbitTemplate.convertAndSend("pagamento.concluido",pagamento);
+        rabbitTemplate.convertAndSend("pagamentos.ex", "", pagamento);
 
         return ResponseEntity.created(endereco).body(pagamento);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PagamentoDto> atualizar(@PathVariable @NotNull Long id, @RequestBody @Valid PagamentoDto dto) {
+    public ResponseEntity<PagamentoDto> atualizar(@PathVariable @NotNull Long id,
+            @RequestBody @Valid PagamentoDto dto) {
         PagamentoDto atualizado = service.atualizarPagamento(id, dto);
         return ResponseEntity.ok(atualizado);
     }
@@ -69,13 +72,12 @@ public class PagamentoController {
 
     @PatchMapping("/{id}/confirmar")
     @CircuitBreaker(name = "atualizaPedido", fallbackMethod = "pagamentoAutorizadoComIntegracaoPendente")
-    public void confirmarPagamento(@PathVariable @NotNull Long id){
+    public void confirmarPagamento(@PathVariable @NotNull Long id) {
         service.confirmarPagamento(id);
     }
 
-    public void pagamentoAutorizadoComIntegracaoPendente(Long id, Exception e){
+    public void pagamentoAutorizadoComIntegracaoPendente(Long id, Exception e) {
         service.alteraStatus(id);
     }
-
 
 }

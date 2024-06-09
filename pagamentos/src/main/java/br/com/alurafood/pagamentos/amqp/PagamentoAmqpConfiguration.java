@@ -1,6 +1,7 @@
 package br.com.alurafood.pagamentos.amqp;
 
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.FanoutExchange;
+// import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -13,20 +14,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class PagamentoAmqpConfiguration {
 
-    @Bean
-    public Queue criaFila(){
-        return new Queue("pagamento.concluido",false);
-    }
-
-    @Bean
-    public RabbitAdmin criaRabbitAdmin(ConnectionFactory conn){
-        return new RabbitAdmin(conn);
-    }
-
-    @Bean
-    public ApplicationListener<ApplicationReadyEvent> inicializaAdmin(RabbitAdmin rabbitAdmin){
-        return event -> rabbitAdmin.initialize();
-    }
+    // @Bean
+    // public Queue criaFila(){
+    //     return new Queue("pagamento.concluido",false);
+    // }
 
     @Bean
     public Jackson2JsonMessageConverter messageConverter(){
@@ -38,6 +29,21 @@ public class PagamentoAmqpConfiguration {
         var rabbitTemplate = new RabbitTemplate(conn);
         rabbitTemplate.setMessageConverter(messageConverter);
         return rabbitTemplate;
+    }
+
+    @Bean
+    public FanoutExchange fanoutExchange(){
+        return new FanoutExchange("pagamentos.ex");
+    }
+
+    @Bean
+    public RabbitAdmin criaRabbitAdmin(ConnectionFactory conn){
+        return new RabbitAdmin(conn);
+    }
+
+    @Bean
+    public ApplicationListener<ApplicationReadyEvent> inicializaAdmin(RabbitAdmin rabbitAdmin){
+        return event -> rabbitAdmin.initialize();
     }
 
 }
